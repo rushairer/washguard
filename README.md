@@ -72,12 +72,19 @@ ADXL355 原始 XYZ
 
 - [项目关键决策](docs/PROJECT_DECISIONS.md)
 - [实验计划与记录规范](docs/EXPERIMENTS.md)
+- [WG-EXP-001 原型硬件与接线](docs/HARDWARE_PROTOTYPE.md)
 - [开发计划](docs/DEVELOPMENT_PLAN.md)
 - [仓库协作规范](AGENTS.md)
 
+## 当前工具
+
+- [WG-EXP-001 采集固件](firmware/acquisition/README.md)
+- [Mac/PC 串口 CSV 采集工具](tools/capture_serial.py)
+- [实验数据目录规范](data/README.md)
+
 ## 下一步
 
-立即完成原型采集链路，并执行 `WG-EXP-001`。
+烧录采集固件，完成静止基线测试，然后执行 `WG-EXP-001`。
 
 第一份有效成果不是漂亮的界面，而是：
 
