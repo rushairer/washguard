@@ -77,6 +77,8 @@ ADXL355 原始 XYZ
 - [WG-EXP-001 原型硬件与接线](docs/HARDWARE_PROTOTYPE.md)
 - [机械结构与正式版硬件路线](docs/MECHANICAL_AND_PRODUCTION_ARCHITECTURE.md)
 - [开发计划](docs/DEVELOPMENT_PLAN.md)
+- [开发日志](docs/DEVELOPMENT_LOG.md)
+- [大赛进度分享 01（2026-09-27）](docs/contest/2026-09-27_PROGRESS_SHARE_01.md)
 - [仓库协作规范](AGENTS.md)
 
 ## 当前工具
