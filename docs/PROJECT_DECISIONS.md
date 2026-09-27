@@ -137,3 +137,20 @@ Motion Primitive
 - 保留两种正式硬件候选：单 PCB 一体化，或 Sensor PCB + Main PCB 双板架构。
 - 当前更重视传感器机械耦合和数据质量，不为了提前减少 PCB 数量而锁死架构。
 - 自研 Sensor PCB 应尽量小、硬、轻，并复用原型阶段验证过的安装基准和方向。
+
+
+## 2026-09-27：产品化路线调整——保留 EVAL-ADXL355Z 作为 Sensor PCB
+
+此前“正式版必须自研 ADXL355 Sensor PCB”的决定被本条替代。
+
+当前决定：
+
+- EVAL-ADXL355Z 可直接作为比赛版、小批量工程版和早期产品化版本的正式 Sensor PCB；
+- 正式产品采用 Sensor PCB + Main PCB 双板架构；
+- EVAL-ADXL355Z 直接刚性固定到产品底壳的 Sensor Island；
+- Main PCB 负责 ESP32-S3、电源、USB-C、无线、RGB/蜂鸣器等；
+- 两块 PCB 优先侧向并排，不把主控板直接叠压在传感器板上；
+- 原型阶段的直立排针 + 杜邦线只用于调试；
+- 产品版应改为焊接柔性线束、低矮锁扣连接器或小型接口转接板；
+- V1.0 优先 USB-C 供电，不强制加入电池；
+- 若未来进入较大批量量产，再重新评估 EVAL 板成本、供应和是否值得改为自研 Sensor PCB。
