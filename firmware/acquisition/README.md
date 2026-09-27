@@ -32,7 +32,7 @@ pio device monitor
 
 ```text
 # adxl355_ids,AD,1D,ED
-# config,odr_hz=500,range_g=2,spi_hz=5000000,lsb_per_g=256000
+# config,odr_hz=500,range_g=2,spi_hz=1000000,lsb_per_g=256000
 # ready
 ```
 
@@ -85,7 +85,7 @@ D,timestamp_us,seq,x_raw,y_raw,z_raw
 
 ```text
 # adxl355_ids,AD,1D,ED
-# config,odr_hz=500,range_g=2,spi_hz=5000000
+# config,odr_hz=500,range_g=2,spi_hz=1000000
 # stats,missed_drdy=0,queue_drop=0
 ```
 
