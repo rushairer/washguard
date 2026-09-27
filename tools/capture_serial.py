@@ -13,6 +13,10 @@ import serial
 LSB_PER_G_2G = 256000.0
 
 
+def utc_now_iso():
+    return datetime.now(timezone.utc).isoformat()
+
+
 def parse_args():
     parser = argparse.ArgumentParser(
         description="采集 WashGuard ADXL355 串口数据并保存为 CSV。"
@@ -37,7 +41,6 @@ def main():
     meta_path = output.with_suffix(".meta.json")
     log_path = output.with_suffix(".device.log")
 
-    started_at = datetime.now(timezone.utc).isoformat()
     stop_requested = False
 
     def request_stop(_signum, _frame):
@@ -49,7 +52,7 @@ def main():
 
     metadata = {
         "experiment": args.experiment,
-        "started_at_utc": started_at,
+        "capture_started_at_utc": utc_now_iso(),
         "serial_port": args.port,
         "baud": args.baud,
         "machine": args.machine,
@@ -66,6 +69,9 @@ def main():
     first_seq = None
     last_seq = None
     sequence_gap_count = 0
+    first_sample_device_timestamp_us = None
+    first_sample_host_utc = None
+    last_sample_device_timestamp_us = None
 
     print(f"打开串口: {args.port} @ {args.baud}")
     print(f"CSV: {output}")
@@ -123,6 +129,8 @@ def main():
 
                 if first_seq is None:
                     first_seq = seq
+                    first_sample_device_timestamp_us = timestamp_us
+                    first_sample_host_utc = utc_now_iso()
 
                 if last_seq is not None and seq != last_seq + 1:
                     sequence_gap_count += max(0, seq - last_seq - 1)
@@ -132,6 +140,7 @@ def main():
                     )
 
                 last_seq = seq
+                last_sample_device_timestamp_us = timestamp_us
 
                 writer.writerow(
                     [
@@ -154,11 +163,14 @@ def main():
     finally:
         metadata.update(
             {
-                "ended_at_utc": datetime.now(timezone.utc).isoformat(),
+                "capture_ended_at_utc": utc_now_iso(),
                 "sample_count": sample_count,
                 "first_seq": first_seq,
                 "last_seq": last_seq,
                 "sequence_gap_count": sequence_gap_count,
+                "first_sample_device_timestamp_us": first_sample_device_timestamp_us,
+                "first_sample_host_utc": first_sample_host_utc,
+                "last_sample_device_timestamp_us": last_sample_device_timestamp_us,
             }
         )
         meta_path.write_text(
@@ -169,6 +181,12 @@ def main():
         print()
         print(f"采集结束，共 {sample_count} 样本")
         print(f"序号缺口: {sequence_gap_count}")
+        if first_sample_host_utc is not None:
+            print(
+                "时间锚点: "
+                f"device={first_sample_device_timestamp_us} us "
+                f"<-> host={first_sample_host_utc}"
+            )
         print(f"元信息: {meta_path}")
         print(f"设备日志: {log_path}")
 
