@@ -1,5 +1,7 @@
 # WG-EXP-001 原型硬件与接线
 
+> 第一次接触电子制作，请先阅读：[第一版原型机小白组装指南](BEGINNER_PROTOTYPE_ASSEMBLY.md)。
+
 ## 1. 目标
 
 使用 **EVAL-ADXL355Z + XIAO ESP32S3** 建立第一版稳定采集链路，连续记录 500 Hz 三轴振动数据，为 WG-EXP-001 提供真实原始数据。
@@ -65,13 +67,13 @@ EVAL-ADXL355Z 的：
 | LPF | 125 Hz |
 | HPF | 关闭 |
 | 量程 | ±2 g |
-| SPI | 5 MHz / Mode 0 |
+| SPI | 1 MHz / Mode 0 |
 | 数据 | 20 bit X/Y/Z |
 | 时间戳 | ESP32-S3 单调微秒时间 |
 | 主机输出 | USB Serial |
 | 目标格式 | CSV |
 
-选择 5 MHz SPI 的原因是它位于 ADXL355 官方允许范围内，并且能够在 2 ms 的 500 Hz 采样周期内非常快地完成 9 字节 X/Y/Z 连续读取。
+第一版工程原型把 SPI 降到 1 MHz。ADXL355 官方允许 100 kHz～10 MHz；在 500 Hz ODR 下，每个样本周期约 2 ms，1 MHz 读取 9 字节 X/Y/Z 仍有充足余量，同时对面包板和短杜邦线更宽容，更适合初次搭建。
 
 ## 5. 为什么使用 DRDY，而不是固定 delay(2)
 
