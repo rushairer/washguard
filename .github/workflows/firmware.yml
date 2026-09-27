@@ -33,5 +33,5 @@ jobs:
       - name: 编译采集固件
         run: pio run -d firmware/acquisition
 
-      - name: 检查主机采集脚本语法
-        run: python -m py_compile tools/capture_serial.py
+      - name: 检查主机工具语法
+        run: python -m py_compile tools/*.py
