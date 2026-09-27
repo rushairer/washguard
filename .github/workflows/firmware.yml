@@ -1,13 +1,15 @@
-name: 固件构建
+name: 固件与采集工具检查
 
 on:
   push:
     paths:
       - "firmware/**"
+      - "tools/**"
       - ".github/workflows/firmware.yml"
   pull_request:
     paths:
       - "firmware/**"
+      - "tools/**"
       - ".github/workflows/firmware.yml"
   workflow_dispatch:
 
@@ -30,3 +32,6 @@ jobs:
 
       - name: 编译采集固件
         run: pio run -d firmware/acquisition
+
+      - name: 检查主机采集脚本语法
+        run: python -m py_compile tools/capture_serial.py
