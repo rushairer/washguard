@@ -1,0 +1,11 @@
+.DS_Store
+.venv/
+__pycache__/
+*.pyc
+.pio/
+.vscode/
+
+# 原始实验数据默认不进入 Git 历史
+data/raw/**/*.csv
+data/raw/**/*.log
+data/raw/**/*.bin
