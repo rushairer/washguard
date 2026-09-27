@@ -28,13 +28,50 @@ pio run -t upload
 pio device monitor
 ```
 
-正式实验建议不要直接复制终端文本，而使用仓库根目录下的：
+串口看到以下内容才说明 ADXL355 基本通信正常：
 
-```bash
-python3 tools/capture_serial.py ...
+```text
+# adxl355_ids,AD,1D,ED
+# config,odr_hz=500,range_g=2,spi_hz=5000000,lsb_per_g=256000
+# ready
 ```
 
-它会把固件的原始整数输出转换为包含原始值与 g 值的 CSV，同时生成实验元信息 JSON。
+## 正式采集
+
+主机端建议使用 Python 3.10+。
+
+首次准备：
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+python3 -m pip install -r tools/requirements.txt
+```
+
+macOS 可先查串口：
+
+```bash
+ls /dev/cu.*
+```
+
+执行 60 秒预检采集：
+
+```bash
+python3 tools/capture_serial.py \
+  --port /dev/cu.usbmodem101 \
+  --output data/raw/WG-PREFLIGHT-001/run-001.csv \
+  --experiment WG-PREFLIGHT-001 \
+  --mount "顶部靠后"
+```
+
+结束后运行：
+
+```bash
+python3 tools/validate_capture.py \
+  data/raw/WG-PREFLIGHT-001/run-001.csv
+```
+
+只有预检通过后再开始完整 WG-EXP-001。
 
 ## 固件输出协议
 
@@ -52,8 +89,17 @@ D,timestamp_us,seq,x_raw,y_raw,z_raw
 # stats,missed_drdy=0,queue_drop=0
 ```
 
-正式 WG-EXP-001 要求重点检查：
+正式采集要求重点检查：
 
 - `missed_drdy=0`
 - `queue_drop=0`
-- seq 连续
+- `seq` 连续
+- 无明显削顶
+- 估算 ODR 接近 500 Hz
+
+采集脚本会同时保存：
+
+- CSV 原始数据；
+- `.meta.json` 实验元信息；
+- `.device.log` 固件诊断日志；
+- 第一帧设备时间戳与主机 UTC 的对齐锚点。
