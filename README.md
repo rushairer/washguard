@@ -75,6 +75,7 @@ ADXL355 原始 XYZ
 - [项目关键决策](docs/PROJECT_DECISIONS.md)
 - [实验计划与记录规范](docs/EXPERIMENTS.md)
 - [WG-EXP-001 原型硬件与接线](docs/HARDWARE_PROTOTYPE.md)
+- [机械结构与正式版硬件路线](docs/MECHANICAL_AND_PRODUCTION_ARCHITECTURE.md)
 - [开发计划](docs/DEVELOPMENT_PLAN.md)
 - [仓库协作规范](AGENTS.md)
 
