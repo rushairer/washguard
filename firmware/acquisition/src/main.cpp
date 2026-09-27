@@ -13,7 +13,7 @@ constexpr uint8_t PIN_SCK = D8;
 constexpr uint8_t PIN_MISO = D9;
 constexpr uint8_t PIN_MOSI = D10;
 
-constexpr uint32_t SPI_HZ = 5000000;
+constexpr uint32_t SPI_HZ = 1000000;
 constexpr uint32_t SERIAL_BAUD = 921600;
 
 constexpr uint8_t REG_DEVID_AD = 0x00;
@@ -218,7 +218,7 @@ void setup() {
   }
 
   Serial.println();
-  Serial.println("# washguard_acquisition,version=0.1.1");
+  Serial.println("# washguard_acquisition,version=0.1.2");
 
   pinMode(PIN_CS, OUTPUT);
   digitalWrite(PIN_CS, HIGH);
