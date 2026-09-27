@@ -31,7 +31,8 @@ SADDLE_W = 13.0
 SADDLE_H = 1.8
 SADDLE_EDGE_R = 1.0
 SADDLE_GROOVE_OPENING = 11.0
-SADDLE_GROOVE_DEPTH = 0.55
+SADDLE_GROOVE_DEPTH = 0.8
+SADDLE_GROOVE_BOTTOM = SADDLE_GROOVE_OPENING - 2 * SADDLE_GROOVE_DEPTH
 
 CLAMP_CENTER_X = 34.0
 CLAMP_SCREW_SPACING = 18.0
@@ -44,6 +45,7 @@ CLAMP_T = 3.2
 CLAMP_EDGE_CHAMFER = 0.8
 CLAMP_GROOVE_OPENING = 11.0
 CLAMP_GROOVE_DEPTH = 1.25
+CLAMP_GROOVE_BOTTOM = CLAMP_GROOVE_OPENING - 2 * CLAMP_GROOVE_DEPTH
 
 hole_centers = [
     (BOARD_X0 + HOLE_EDGE, BOARD_Y0 + HOLE_EDGE),
@@ -52,12 +54,13 @@ hole_centers = [
     (BOARD_X0 + BOARD_W - HOLE_EDGE, BOARD_Y0 + BOARD_H - HOLE_EDGE),
 ]
 
-def triangular_prism_x(x0, length, center_y, z_open, opening_width, depth):
+def trapezoid_prism_x(x0, length, center_y, z_open, opening_width, bottom_width, depth):
     wp = cq.Workplane('YZ', origin=(x0, 0, 0))
     return (
         wp.moveTo(center_y - opening_width / 2.0, z_open)
         .lineTo(center_y + opening_width / 2.0, z_open)
-        .lineTo(center_y, z_open - depth)
+        .lineTo(center_y + bottom_width / 2.0, z_open - depth)
+        .lineTo(center_y - bottom_width / 2.0, z_open - depth)
         .close()
         .extrude(length)
     )
@@ -92,15 +95,16 @@ except Exception:
     pass
 base = base.union(saddle)
 
-saddle_v = triangular_prism_x(
+saddle_groove = trapezoid_prism_x(
     SADDLE_X0 - 0.2,
     SADDLE_LEN + 0.4,
     CABLE_CENTER_Y,
     BASE_T + SADDLE_H + 0.01,
     SADDLE_GROOVE_OPENING,
+    SADDLE_GROOVE_BOTTOM,
     SADDLE_GROOVE_DEPTH,
 )
-base = base.cut(saddle_v)
+base = base.cut(saddle_groove)
 
 clamp_screw_centers = [
     (CLAMP_CENTER_X, CABLE_CENTER_Y - CLAMP_SCREW_SPACING / 2.0),
@@ -137,28 +141,16 @@ for y in (-CLAMP_SCREW_SPACING / 2.0, CLAMP_SCREW_SPACING / 2.0):
     )
     clamp = clamp.cut(hole)
 
-clamp_v = triangular_prism_x(
+clamp_groove = trapezoid_prism_x(
     -CLAMP_W / 2.0 - 0.2,
     CLAMP_W + 0.4,
     0.0,
     0.01,
     CLAMP_GROOVE_OPENING,
+    CLAMP_GROOVE_BOTTOM,
     -CLAMP_GROOVE_DEPTH,
 )
-clamp = clamp.cut(clamp_v)
-
-pcb = (
-    cq.Workplane('XY').workplane(offset=BASE_T + POST_H)
-    .center(BOARD_X0 + BOARD_W / 2.0, BOARD_Y0 + BOARD_H / 2.0)
-    .box(BOARD_W, BOARD_H, PCB_THICKNESS, centered=(True, True, False))
-)
-for x, y in hole_centers:
-    h = (
-        cq.Workplane('XY').workplane(offset=BASE_T + POST_H + PCB_THICKNESS)
-        .center(x, y).circle(MOUNT_HOLE_D / 2.0)
-        .extrude(-(PCB_THICKNESS + 0.1))
-    )
-    pcb = pcb.cut(h)
+clamp = clamp.cut(clamp_groove)
 
 exporters.export(base, str(OUT / 'WashGuard_ADXL355_Base_V0.2.step'))
 exporters.export(base, str(OUT / 'WashGuard_ADXL355_Base_V0.2.stl'), tolerance=0.02, angularTolerance=0.1)
