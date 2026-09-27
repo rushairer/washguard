@@ -13,7 +13,7 @@ constexpr uint8_t PIN_SCK = D8;
 constexpr uint8_t PIN_MISO = D9;
 constexpr uint8_t PIN_MOSI = D10;
 
-constexpr uint32_t SPI_HZ = 5'000'000;
+constexpr uint32_t SPI_HZ = 5000000;
 constexpr uint32_t SERIAL_BAUD = 921600;
 
 constexpr uint8_t REG_DEVID_AD = 0x00;
@@ -99,7 +99,7 @@ int32_t decode20Bit(const uint8_t* bytes) {
   return static_cast<int32_t>(value);
 }
 
-bool readSample(Sample& sample, uint32_t seq) {
+void readSample(Sample& sample, uint32_t seq) {
   uint8_t raw[9] = {};
   readRegisters(REG_XDATA3, raw, sizeof(raw));
 
@@ -108,7 +108,6 @@ bool readSample(Sample& sample, uint32_t seq) {
   sample.xRaw = decode20Bit(&raw[0]);
   sample.yRaw = decode20Bit(&raw[3]);
   sample.zRaw = decode20Bit(&raw[6]);
-  return true;
 }
 
 bool configureAdxl355() {
@@ -198,7 +197,7 @@ void writerTask(void*) {
     }
 
     const int64_t nowUs = esp_timer_get_time();
-    if (nowUs - lastStatsUs >= 5'000'000) {
+    if (nowUs - lastStatsUs >= 5000000) {
       Serial.printf(
           "# stats,missed_drdy=%lu,queue_drop=%lu\n",
           static_cast<unsigned long>(missedDrdy),
@@ -219,7 +218,7 @@ void setup() {
   }
 
   Serial.println();
-  Serial.println("# washguard_acquisition,version=0.1.0");
+  Serial.println("# washguard_acquisition,version=0.1.1");
 
   pinMode(PIN_CS, OUTPUT);
   digitalWrite(PIN_CS, HIGH);
