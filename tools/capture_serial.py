@@ -72,19 +72,24 @@ def main():
     print("按 Ctrl-C 结束采集。")
 
     try:
-        with serial.Serial(args.port, args.baud, timeout=1) as ser,              output.open("w", newline="", encoding="utf-8") as csv_file,              log_path.open("w", encoding="utf-8") as log_file:
-
+        with (
+            serial.Serial(args.port, args.baud, timeout=1) as ser,
+            output.open("w", newline="", encoding="utf-8") as csv_file,
+            log_path.open("w", encoding="utf-8") as log_file,
+        ):
             writer = csv.writer(csv_file)
-            writer.writerow([
-                "timestamp_us",
-                "seq",
-                "x_raw",
-                "y_raw",
-                "z_raw",
-                "x_g",
-                "y_g",
-                "z_g",
-            ])
+            writer.writerow(
+                [
+                    "timestamp_us",
+                    "seq",
+                    "x_raw",
+                    "y_raw",
+                    "z_raw",
+                    "x_g",
+                    "y_g",
+                    "z_g",
+                ]
+            )
 
             while not stop_requested:
                 raw_line = ser.readline()
@@ -118,24 +123,28 @@ def main():
 
                 if first_seq is None:
                     first_seq = seq
+
                 if last_seq is not None and seq != last_seq + 1:
                     sequence_gap_count += max(0, seq - last_seq - 1)
                     print(
                         f"警告: seq 不连续，上一帧={last_seq} 当前={seq}",
                         file=sys.stderr,
                     )
+
                 last_seq = seq
 
-                writer.writerow([
-                    timestamp_us,
-                    seq,
-                    x_raw,
-                    y_raw,
-                    z_raw,
-                    x_raw / LSB_PER_G_2G,
-                    y_raw / LSB_PER_G_2G,
-                    z_raw / LSB_PER_G_2G,
-                ])
+                writer.writerow(
+                    [
+                        timestamp_us,
+                        seq,
+                        x_raw,
+                        y_raw,
+                        z_raw,
+                        x_raw / LSB_PER_G_2G,
+                        y_raw / LSB_PER_G_2G,
+                        z_raw / LSB_PER_G_2G,
+                    ]
+                )
 
                 sample_count += 1
                 if sample_count % 500 == 0:
@@ -143,13 +152,15 @@ def main():
                     print(f"已采集 {sample_count} 样本", end="\r", flush=True)
 
     finally:
-        metadata.update({
-            "ended_at_utc": datetime.now(timezone.utc).isoformat(),
-            "sample_count": sample_count,
-            "first_seq": first_seq,
-            "last_seq": last_seq,
-            "sequence_gap_count": sequence_gap_count,
-        })
+        metadata.update(
+            {
+                "ended_at_utc": datetime.now(timezone.utc).isoformat(),
+                "sample_count": sample_count,
+                "first_seq": first_seq,
+                "last_seq": last_seq,
+                "sequence_gap_count": sequence_gap_count,
+            }
+        )
         meta_path.write_text(
             json.dumps(metadata, ensure_ascii=False, indent=2) + "\n",
             encoding="utf-8",
