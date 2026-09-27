@@ -1,78 +1,84 @@
 # WashGuard
 
-WashGuard is a non-invasive washing-machine vibration sensing project.
+WashGuard 是一个面向洗衣机的**非侵入式振动感知与状态识别项目**。
 
-The first prototype uses **EVAL-ADXL355Z + XIAO ESP32S3** to collect real vibration data from the washing-machine chassis. The project goal is not to memorize one machine's fixed wash program, but to build a sensing and inference stack that can gradually adapt to different machines, programs, loads, and mounting positions.
+首版原型采用 **EVAL-ADXL355Z + XIAO ESP32S3**，从洗衣机机身外部采集真实三轴振动数据。项目目标不是记住某一台洗衣机的固定流程，而是建立一套能够逐步适配**不同机型、不同程序、不同负载和不同安装位置**的感知与推断体系。
 
-## Current phase
+## 当前阶段
 
-**Phase 0 / Prototype data acquisition**
+**阶段 0：原型机数据采集与可观测性验证**
 
-The immediate objective is to prove that useful washing-machine operating states are observable from external vibration.
+当前首要目标只有一个：
 
-Do not optimize the enclosure, PCB, mobile app, cloud service, or ML model before this is demonstrated with real data.
+> 证明从洗衣机外部采集到的振动信号，足以稳定观察并区分有产品价值的运行状态。
 
-### First milestone
+在这一点被真实数据证明之前，不优先投入外壳、定制 PCB、App、云服务或复杂机器学习模型。
 
-Complete `WG-EXP-001`:
+### 第一个里程碑
 
-- EVAL-ADXL355Z connected to XIAO ESP32S3
-- stable three-axis acquisition
-- target initial sampling rate: 500 Hz
-- initial range: +/-2 g, increase if clipping is observed
-- retain raw XYZ samples and monotonic timestamps
-- record one complete washing cycle
-- record human ground-truth timestamps for visible/audible state changes
+完成 `WG-EXP-001`：
 
-## Core engineering principles
+- EVAL-ADXL355Z 连接 XIAO ESP32S3；
+- 实现稳定的三轴连续采样；
+- 初始目标采样率：500 Hz；
+- 初始量程：±2 g，如发现削顶则提高量程；
+- 保留原始 XYZ 数据与单调递增时间戳；
+- 记录至少一个完整洗衣周期；
+- 同步记录人工 Ground Truth，标记肉眼/声音可确认的状态变化时刻。
 
-1. **Raw data first.** Preserve raw XYZ samples; derived features must not replace source data.
-2. **Do not overfit the first washing machine.** Initial data is an exploratory dataset, not the final training set.
-3. **Prefer orientation-independent features.** Mounting direction and position must not be assumed fixed.
-4. **Per-machine calibration is a first-class concept.** Each installation may build a Machine Profile.
-5. **Recognize motion primitives before semantic wash stages.** Physical motion is more transferable than vendor-specific program names.
-6. **Use a hybrid architecture.** DSP + normalization + calibration + rules/state machine first; ML is introduced only when the dataset justifies it.
-7. **Completion detection has higher product priority than perfect stage naming.** The first useful product can reliably distinguish Idle / Running / Finished before it distinguishes every wash/rinse sub-stage.
-8. **Every important conclusion should be reproducible.** Decisions should point back to experiments and recorded evidence.
+## 核心工程原则
 
-## Planned signal architecture
+1. **原始数据优先。** 派生特征不能替代原始 XYZ 数据。
+2. **不要过拟合第一台洗衣机。** 首批数据是探索性数据集，不是最终训练集。
+3. **优先使用方向不敏感特征。** 不假设传感器方向和安装位置永远固定。
+4. **设备自校准是一级能力。** 每次安装可以逐步建立该洗衣机自己的 Machine Profile（设备画像）。
+5. **先识别运动原语，再解释洗衣语义。** 物理运动模式比厂商自定义的“洗涤/漂洗”流程更容易跨机型泛化。
+6. **采用混合架构。** 先做 DSP、归一化、自校准、规则与状态机；数据规模足够后再引入机器学习。
+7. **“是否完成”优先于“精确叫出每一道工序”。** 第一代真正有用的产品可以先可靠识别 Idle / Running / Finished。
+8. **所有重要结论必须可复现。** 架构和算法决策应能追溯到具体实验与数据证据。
+
+## 规划中的信号处理架构
 
 ```text
-ADXL355 raw XYZ
-      |
-      v
-Signal conditioning / gravity removal / filtering
-      |
-      +----> orientation-independent features
-      |
-      v
-Machine calibration / Machine Profile
-      |
-      v
-Feature vector
-      |
-      +----> Rules / thresholds
-      |
-      +----> ML classifier (later, if justified)
-      |
-      v
-Motion primitive
-      |
-      v
-Sequence / state model
-      |
-      v
-User-facing state
-Idle / Running / Washing / Spinning / Finished / Abnormal
+ADXL355 原始 XYZ
+        |
+        v
+信号预处理 / 去重力 / 滤波
+        |
+        +----> 方向不敏感特征
+        |
+        v
+设备自校准 / Machine Profile
+        |
+        v
+特征向量
+        |
+        +----> 规则 / 阈值
+        |
+        +----> ML 分类器（后续，数据充分后再引入）
+        |
+        v
+运动原语 Motion Primitive
+        |
+        v
+时序 / 状态模型
+        |
+        v
+用户可理解状态
+待机 / 运行 / 洗涤 / 脱水 / 完成 / 异常
 ```
 
-## Documentation
+## 项目文档
 
-- [Project decisions](docs/PROJECT_DECISIONS.md)
-- [Experiment plan](docs/EXPERIMENTS.md)
-- [Development plan](docs/DEVELOPMENT_PLAN.md)
-- [Repository working rules](AGENTS.md)
+- [项目关键决策](docs/PROJECT_DECISIONS.md)
+- [实验计划与记录规范](docs/EXPERIMENTS.md)
+- [开发计划](docs/DEVELOPMENT_PLAN.md)
+- [仓库协作规范](AGENTS.md)
 
-## Immediate next action
+## 下一步
 
-Build the prototype acquisition path and run `WG-EXP-001`. The result should be a complete raw dataset plus ground-truth annotations from one real washing cycle.
+立即完成原型采集链路，并执行 `WG-EXP-001`。
+
+第一份有效成果不是漂亮的界面，而是：
+
+> **一个完整洗衣周期的原始振动数据 + 对应的人工状态标注。**
